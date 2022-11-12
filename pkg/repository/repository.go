@@ -8,11 +8,14 @@ import (
 
 type News interface {
 	CreateNews(entity.Article) (int, error)
+	DeleteNews(entity.Article)
 }
 
 type Auth interface {
 	Register(entity.User)
-	Login(entity.User) bool
+	Login(string, string) (bool, int)
+	SaveSession(string, int, int64)
+	DeleteSession(string)
 }
 
 type MainDB struct {

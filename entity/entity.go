@@ -1,13 +1,14 @@
 package entity
 
 type Article struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
-	User  string
+	ID     string `json:"id"`
+	Title  string `json:"title"`
+	Text   string `json:"text"`
+	Author string `json:"author"`
 }
 
 type User struct {
-	ID        int
+	ID        int    `json:"id"`
 	Username  string `json:"username"`
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`

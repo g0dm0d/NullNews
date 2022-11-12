@@ -7,10 +7,16 @@ import (
 )
 
 func (r *MainDB) CreateNews(article entity.Article) (int, error) {
-	res, err := r.db.Exec("INSERT INTO news (title, text) VALUES ($1, $2)", article.Title, article.Text)
-	log.Println(res)
+	_, err := r.db.Exec("INSERT INTO news (title, text, author) VALUES ($1, $2, $3)", article.Title, article.Text, article.Author)
 	if err != nil {
 		log.Panicln(err)
 	}
 	return 0, err
+}
+
+func (r *MainDB) DeleteNews(article entity.Article) {
+	_, err := r.db.Exec("DELETE FROM news WHERE ID=$1", article.ID)
+	if err != nil {
+		log.Panicln(err)
+	}
 }

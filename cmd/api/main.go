@@ -4,6 +4,7 @@ import (
 	"github.com/g0dm0d/nullnews"
 	"github.com/g0dm0d/nullnews/config"
 	"github.com/g0dm0d/nullnews/pkg/handler"
+	"github.com/g0dm0d/nullnews/pkg/middlewares"
 	"github.com/g0dm0d/nullnews/pkg/repository"
 	"github.com/g0dm0d/nullnews/pkg/service"
 )
@@ -13,8 +14,11 @@ func main() {
 	defer app.DB.Close()
 
 	repository := repository.NewRep(app.DB)
-	service := service.NewSer(repository)
-	handler := handler.New(service)
+	service := service.NewSer(repository, &service.Ctx{
+		Secret: app.Config.Secret,
+	})
+	middlewares := middlewares.NewMid(service)
+	handler := handler.New(service, middlewares)
 
 	api := nullnews.NewServer(&nullnews.Config{
 		Addr:   app.Config.Addr,

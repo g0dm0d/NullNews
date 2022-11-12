@@ -7,35 +7,41 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (r *MainDB) Register(article entity.User) {
-	password, err := HashingPass(article.Password)
+func (r *MainDB) Register(user entity.User) {
+	password, err := HashingPass(user.Password)
 	if err != nil {
 		log.Println(err)
-		return
 	}
-	res, err := r.db.Exec("INSERT INTO users (username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5)",
-		article.Username, article.FirstName, article.LastName, article.Email, password)
-	log.Println(res)
+	_, err = r.db.Exec("INSERT INTO users (username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5)",
+		user.Username, user.FirstName, user.LastName, user.Email, password)
 	if err != nil {
 		log.Panicln(err)
-		return
 	}
 }
 
-func (r *MainDB) Login(article entity.User) bool {
-	rows, err := r.db.Query("select password from users where email = $1", article.Email)
+func (r *MainDB) Login(password, email string) (bool, int) {
+	row := r.db.QueryRow("SELECT password, id FROM users WHERE email = $1", email)
+	var user entity.User
+	err := row.Scan(&user.Password, &user.ID)
+	if err != nil {
+		log.Println(err)
+		return false, 0
+	}
+	return CheckPasswordHash(password, user.Password), user.ID
+}
+
+func (r *MainDB) SaveSession(session string, userID int, time int64) {
+	_, err := r.db.Exec("INSERT INTO sessions (refresh_token, user_id) VALUES ($1, $2, $3)", session, userID, time)
 	if err != nil {
 		log.Println(err)
 	}
-	var password string
-	for rows.Next() {
-		err := rows.Scan(&password)
-		if err != nil {
-			log.Println(err)
-			return false
-		}
+}
+
+func (r *MainDB) DeleteSession(token string) {
+	_, err := r.db.Exec("DELETE FROM sessions WHERE refresh_token = $1", token)
+	if err != nil {
+		log.Println(err)
 	}
-	return CheckPasswordHash(article.Password, password)
 }
 
 func HashingPass(password string) (string, error) {
@@ -49,6 +55,5 @@ func HashingPass(password string) (string, error) {
 
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	log.Println(err)
 	return err == nil
 }

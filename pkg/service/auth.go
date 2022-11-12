@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/g0dm0d/nullnews/entity"
@@ -10,12 +9,14 @@ import (
 )
 
 type AuthService struct {
-	repo repository.Auth
+	repo    repository.Auth
+	sectret string
 }
 
-func NewAuth(repo repository.Auth) *AuthService {
+func NewAuth(repo repository.Auth, sectret string) *AuthService {
 	return &AuthService{
-		repo: repo,
+		repo:    repo,
+		sectret: sectret,
 	}
 }
 
@@ -28,9 +29,30 @@ func (s *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	var req entity.User
 	json.NewDecoder(r.Body).Decode(&req)
-	if !s.repo.Login(req) {
-		log.Println("asd")
+	status, id := s.repo.Login(req.Password, req.Email)
+	if !status {
 		w.WriteHeader(http.StatusUnauthorized)
 	}
-	// w.WriteHeader(http.StatusOK)
+	session, time := SessionGenerate()
+	SetCookie(w, "token", TokenGenerate(id, s.sectret))
+	SetCookie(w, "session", session)
+	s.repo.SaveSession(session, id, time)
+}
+
+func SetCookie(w http.ResponseWriter, name, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		HttpOnly: false,
+	})
+}
+
+func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		return
+	}
+	SetCookie(w, "token", "")
+	SetCookie(w, "session", "")
+	s.repo.DeleteSession(cookie.Value)
 }

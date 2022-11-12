@@ -13,8 +13,9 @@ func New() *App {
 
 	app.DB = setupDB(vars.DBDriver, vars.DBDSN)
 	app.Config = &ServerConfig{
-		Addr: vars.ApiAddr,
-		Port: vars.ApiPort,
+		Addr:   vars.ApiAddr,
+		Port:   vars.ApiPort,
+		Secret: vars.Secret,
 	}
 
 	return app
