@@ -17,7 +17,9 @@ func main() {
 	service := service.NewSer(repository, &service.Ctx{
 		Secret: app.Config.Secret,
 	})
-	middlewares := middlewares.NewMid(service)
+	middlewares := middlewares.NewMid(service, &middlewares.Ctx{
+		Secret: app.Config.Secret,
+	})
 	handler := handler.New(service, middlewares)
 
 	api := nullnews.NewServer(&nullnews.Config{

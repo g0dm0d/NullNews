@@ -8,14 +8,30 @@ import (
 
 type Middlewares struct {
 	service *service.Service
+	ctx     *Ctx
 }
 
-func NewMid(service *service.Service) *Middlewares {
-	return &Middlewares{service: service}
+type Ctx struct {
+	Secret string
+}
+
+func NewMid(service *service.Service, ctx *Ctx) *Middlewares {
+	return &Middlewares{
+		service: service,
+		ctx:     ctx,
+	}
 }
 
 func (m *Middlewares) AuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//check JWT and cookie
+		token, err := r.Cookie("token")
+		if err != nil {
+			return
+		}
+		_, err = service.TokenParse(token.Value, m.ctx.Secret)
+		if err != nil {
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }

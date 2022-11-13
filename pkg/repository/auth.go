@@ -2,6 +2,7 @@ package repository
 
 import (
 	"log"
+	"time"
 
 	"github.com/g0dm0d/nullnews/entity"
 	"golang.org/x/crypto/bcrypt"
@@ -30,15 +31,15 @@ func (r *MainDB) Login(password, email string) (bool, int) {
 	return CheckPasswordHash(password, user.Password), user.ID
 }
 
-func (r *MainDB) SaveSession(session string, userID int, time int64) {
-	_, err := r.db.Exec("INSERT INTO sessions (refresh_token, user_id) VALUES ($1, $2, $3)", session, userID, time)
-	if err != nil {
-		log.Println(err)
-	}
+func (r *MainDB) SaveSession(session string, userID int, time time.Time) (int, error) {
+	row := r.db.QueryRow("INSERT INTO sessions (refresh_token, user_id, expires_time) VALUES ($1, $2, $3) RETURNING id", session, userID, time)
+	var id int
+	err := row.Scan(&id)
+	return id, err
 }
 
-func (r *MainDB) DeleteSession(token string) {
-	_, err := r.db.Exec("DELETE FROM sessions WHERE refresh_token = $1", token)
+func (r *MainDB) DeleteSession(id float64) {
+	_, err := r.db.Exec("DELETE FROM sessions WHERE id = $1", id)
 	if err != nil {
 		log.Println(err)
 	}

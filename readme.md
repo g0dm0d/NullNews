@@ -1,8 +1,14 @@
 # NullNews
 
-road to minimal version
+### Road to minimal version
+
 - [x] simple auth system
 - [x] create news
 - [x] delete news
 - [x] jwt token
-- [ ] make a division by roles
+- [x] make a division by roles
+
+### Goals
+
+- [ ] func refresh token
+- [ ] update the architecture of the project

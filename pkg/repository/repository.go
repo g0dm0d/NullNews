@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/g0dm0d/nullnews/entity"
 )
@@ -14,8 +15,8 @@ type News interface {
 type Auth interface {
 	Register(entity.User)
 	Login(string, string) (bool, int)
-	SaveSession(string, int, int64)
-	DeleteSession(string)
+	SaveSession(string, int, time.Time) (int, error)
+	DeleteSession(float64)
 }
 
 type MainDB struct {

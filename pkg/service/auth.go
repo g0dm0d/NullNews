@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/g0dm0d/nullnews/entity"
@@ -26,17 +27,34 @@ func (s *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 	s.repo.Register(req)
 }
 
+type Session struct {
+	Session string
+}
+
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	var req entity.User
 	json.NewDecoder(r.Body).Decode(&req)
-	status, id := s.repo.Login(req.Password, req.Email)
+	status, userID := s.repo.Login(req.Password, req.Email)
 	if !status {
 		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
 	session, time := SessionGenerate()
-	SetCookie(w, "token", TokenGenerate(id, s.sectret))
-	SetCookie(w, "session", session)
-	s.repo.SaveSession(session, id, time)
+	sessionID, err := s.repo.SaveSession(session, userID, time)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	b, err := json.Marshal(&Session{Session: session})
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	token := TokenGenerate(userID, sessionID, s.sectret)
+	SetCookie(w, "token", token)
+	w.Write([]byte(b))
 }
 
 func SetCookie(w http.ResponseWriter, name, value string) {
@@ -48,11 +66,14 @@ func SetCookie(w http.ResponseWriter, name, value string) {
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
+	token, err := r.Cookie("token")
 	if err != nil {
 		return
 	}
 	SetCookie(w, "token", "")
-	SetCookie(w, "session", "")
-	s.repo.DeleteSession(cookie.Value)
+	ParseToken, err := TokenParse(token.Value, s.sectret)
+	if err != nil {
+		return
+	}
+	s.repo.DeleteSession(ParseToken.SessionID)
 }
