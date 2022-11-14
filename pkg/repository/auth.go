@@ -16,7 +16,7 @@ func (r *MainDB) Register(user entity.User) {
 	_, err = r.db.Exec("INSERT INTO users (username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5)",
 		user.Username, user.FirstName, user.LastName, user.Email, password)
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 	}
 }
 
@@ -46,9 +46,9 @@ func (r *MainDB) DeleteSession(id float64) {
 }
 
 func HashingPass(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
 		return "", err
 	}
 	return string(bytes), err
