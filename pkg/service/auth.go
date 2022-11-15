@@ -70,6 +70,6 @@ func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	s.repo.DeleteSession(ParseToken.SessionID)
 }
 
-func (s *AuthService) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	// update JWT by session_token in localstorage
-}
+// func (s *AuthService) RefreshToken(w http.ResponseWriter, r *http.Request) {
+// update JWT by session_token in localstorage
+// }
