@@ -1,5 +1,7 @@
 # NullNews
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/g0dm0d/nullnews)](https://goreportcard.com/report/github.com/g0dm0d/nullnews)
+
 ### Road to minimal version
 
 - [x] simple auth system

@@ -12,9 +12,10 @@ CREATE TABLE users
 CREATE TABLE news
 (
  ID       SERIAL      PRIMARY KEY,
- title    VARCHAR(50) NOT NULL,
- text     TEXT        NOT NULL,
- author   INTEGER     NOT NULL REFERENCES users(id)
+ title      VARCHAR(50) NOT NULL,
+ text       TEXT        NOT NULL,
+ author     INTEGER     NOT NULL REFERENCES users(id)
+ created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT timezone('utc', now())
 );
 
 CREATE TABLE sessions

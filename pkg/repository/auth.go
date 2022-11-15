@@ -20,25 +20,25 @@ func (r *MainDB) Register(user entity.User) {
 	}
 }
 
-func (r *MainDB) Login(password, email string) (bool, int) {
-	row := r.db.QueryRow("SELECT password, id FROM users WHERE email = $1", email)
+func (r *MainDB) Login(password, email string) (bool, entity.User) {
+	row := r.db.QueryRow("SELECT password, id, permission FROM users WHERE email = $1", email)
 	var user entity.User
-	err := row.Scan(&user.Password, &user.ID)
+	err := row.Scan(&user.Password, &user.ID, &user.Permission)
 	if err != nil {
 		log.Println(err)
-		return false, 0
+		return false, entity.User{}
 	}
-	return CheckPasswordHash(password, user.Password), user.ID
+	return CheckPasswordHash(password, user.Password), user
 }
 
 func (r *MainDB) SaveSession(session string, userID int, time time.Time) (int, error) {
-	row := r.db.QueryRow("INSERT INTO sessions (refresh_token, user_id, expires_time) VALUES ($1, $2, $3) RETURNING id", session, userID, time)
+	row := r.db.QueryRow("INSERT INTO sessions (refresh_token, user_id, expires_time) VALUES ($1, $2, $3) RETURNING id, permission", session, userID, time)
 	var id int
 	err := row.Scan(&id)
 	return id, err
 }
 
-func (r *MainDB) DeleteSession(id float64) {
+func (r *MainDB) DeleteSession(id int) {
 	_, err := r.db.Exec("DELETE FROM sessions WHERE id = $1", id)
 	if err != nil {
 		log.Println(err)

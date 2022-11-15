@@ -27,15 +27,19 @@ func (h *Handler) Router() chi.Router {
 		r.Post("/sign-up", h.service.Register)
 		r.Post("/login", h.service.Login)
 		r.Post("/logout", h.service.Logout)
-		r.Post("/new-article", h.service.CreateNews)
 		r.Post("/delete-article", h.service.DeleteNews)
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(h.middlewares.AuthUser)
+		r.Use(h.middlewares.User)
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Hello World!"))
 		})
+	})
+
+	r.Group(func(r chi.Router) {
+		r.Use(h.middlewares.User)
+		r.Post("/new-article", h.service.CreateNews)
 	})
 	return r
 }

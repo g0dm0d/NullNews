@@ -14,9 +14,9 @@ type News interface {
 
 type Auth interface {
 	Register(entity.User)
-	Login(string, string) (bool, int)
+	Login(string, string) (bool, entity.User)
 	SaveSession(string, int, time.Time) (int, error)
-	DeleteSession(float64)
+	DeleteSession(int)
 }
 
 type MainDB struct {

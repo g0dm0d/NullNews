@@ -34,13 +34,13 @@ type Session struct {
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	var req entity.User
 	json.NewDecoder(r.Body).Decode(&req)
-	status, userID := s.repo.Login(req.Password, req.Email)
+	status, user := s.repo.Login(req.Password, req.Email)
 	if !status {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	session, time := SessionGenerate()
-	sessionID, err := s.repo.SaveSession(session, userID, time)
+	sessionID, err := s.repo.SaveSession(session, user.ID, time)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -52,17 +52,9 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	token := TokenGenerate(userID, sessionID, s.sectret)
+	token := TokenGenerate(user.ID, sessionID, user.Permission, s.sectret)
 	SetCookie(w, "token", token)
 	w.Write([]byte(b))
-}
-
-func SetCookie(w http.ResponseWriter, name, value string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     name,
-		Value:    value,
-		HttpOnly: false,
-	})
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
@@ -76,4 +68,8 @@ func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.repo.DeleteSession(ParseToken.SessionID)
+}
+
+func (s *AuthService) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	// update JWT by session_token in localstorage
 }

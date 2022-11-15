@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -12,10 +13,11 @@ import (
 const tokenTime = 15 * time.Minute
 const sessionTime = 336 * time.Hour
 
-func TokenGenerate(userID, sessionID int, secret string) string {
+func TokenGenerate(userID, sessionID, permission int, secret string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user":       userID,
 		"session_id": sessionID,
+		"permission": permission,
 		"exp":        time.Now().Add(tokenTime).Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(secret))
@@ -38,18 +40,28 @@ func TokenParse(tokenString, secret string) (*TokenJWT, error) {
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return &TokenJWT{
-			UserID:    claims["user"].(float64),
-			SessionID: claims["session_id"].(float64),
-			Exp:       claims["exp"].(float64),
+			UserID:     claims["user"].(int),
+			SessionID:  claims["session_id"].(int),
+			Permission: claims["permission"].(int),
+			Exp:        claims["exp"].(float64),
 		}, err
 	}
 	return &TokenJWT{}, err
 }
 
+func SetCookie(w http.ResponseWriter, name, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		HttpOnly: false,
+	})
+}
+
 type TokenJWT struct {
-	UserID    float64
-	SessionID float64
-	Exp       float64
+	UserID     int
+	SessionID  int
+	Permission int
+	Exp        float64
 }
 
 func SessionGenerate() (string, time.Time) {

@@ -22,7 +22,7 @@ func NewMid(service *service.Service, ctx *Ctx) *Middlewares {
 	}
 }
 
-func (m *Middlewares) AuthUser(next http.Handler) http.Handler {
+func (m *Middlewares) User(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, err := r.Cookie("token")
 		if err != nil {
@@ -30,6 +30,20 @@ func (m *Middlewares) AuthUser(next http.Handler) http.Handler {
 		}
 		_, err = service.TokenParse(token.Value, m.ctx.Secret)
 		if err != nil {
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (m *Middlewares) Writer(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, err := r.Cookie("token")
+		if err != nil {
+			return
+		}
+		parseToken, err := service.TokenParse(token.Value, m.ctx.Secret)
+		if err != nil && parseToken.Permission < 1 {
 			return
 		}
 		next.ServeHTTP(w, r)
