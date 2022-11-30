@@ -26,19 +26,20 @@ func (h *Handler) Router() chi.Router {
 	r.Group(func(r chi.Router) {
 		r.Post("/sign-up", h.service.Register)
 		r.Post("/login", h.service.Login)
-		r.Post("/logout", h.service.Logout)
 		r.Post("/delete-article", h.service.DeleteNews)
+		r.Post("/refresh-jwt", h.service.RefreshJWT)
 	})
 
 	r.Group(func(r chi.Router) {
 		r.Use(h.middlewares.User)
+		r.Post("/logout", h.service.Logout)
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Hello World!"))
 		})
 	})
 
 	r.Group(func(r chi.Router) {
-		r.Use(h.middlewares.User)
+		r.Use(h.middlewares.Writer)
 		r.Post("/new-article", h.service.CreateNews)
 	})
 	return r

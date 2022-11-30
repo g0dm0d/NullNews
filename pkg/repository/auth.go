@@ -38,13 +38,6 @@ func (r *MainDB) SaveSession(session string, userID int, time time.Time) (int, e
 	return id, err
 }
 
-func (r *MainDB) DeleteSession(id int) {
-	_, err := r.db.Exec("DELETE FROM sessions WHERE id = $1", id)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
 func HashingPass(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	if err != nil {
