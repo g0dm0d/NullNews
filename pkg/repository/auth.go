@@ -8,16 +8,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (r *MainDB) Register(user entity.User) {
+func (r *MainDB) Register(user entity.User) error {
 	password, err := HashingPass(user.Password)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 	_, err = r.db.Exec("INSERT INTO users (username, firstname, lastname, email, password) VALUES ($1, $2, $3, $4, $5)",
 		user.Username, user.FirstName, user.LastName, user.Email, password)
-	if err != nil {
-		log.Println(err)
-	}
+	return err
 }
 
 func (r *MainDB) Login(password, email string) (bool, entity.User) {

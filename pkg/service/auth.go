@@ -24,7 +24,11 @@ func NewAuth(repo repository.Auth, sectret string) *AuthService {
 func (s *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 	var req entity.User
 	json.NewDecoder(r.Body).Decode(&req)
-	s.repo.Register(req)
+	err := s.repo.Register(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {

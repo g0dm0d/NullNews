@@ -13,7 +13,7 @@ type News interface {
 }
 
 type Auth interface {
-	Register(user entity.User)
+	Register(user entity.User) error
 	Login(password, email string) (status bool, user entity.User)
 	SaveSession(token string, userID int, timeEXP time.Time) (int, error)
 }
