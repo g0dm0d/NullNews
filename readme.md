@@ -12,5 +12,5 @@
 
 ### Goals
 
-- [ ] func refresh token
+- [x] func refresh token
 - [ ] update the architecture of the project
