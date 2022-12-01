@@ -6,7 +6,7 @@ CREATE TABLE users
  lastname   VARCHAR(20)   NOT NULL,
  email      VARCHAR(50)   UNIQUE NOT NULL,
  password   VARCHAR(256)  NOT NULL,
- permission INTEGER       NULL
+ permission INTEGER       DEFAULT(0) NOT NULL
 );
 
 CREATE TABLE news
@@ -14,7 +14,7 @@ CREATE TABLE news
  ID       SERIAL      PRIMARY KEY,
  title      VARCHAR(50) NOT NULL,
  text       TEXT        NOT NULL,
- author     INTEGER     NOT NULL REFERENCES users(id)
+ author     INTEGER     NOT NULL REFERENCES users(id),
  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT timezone('utc', now())
 );
 

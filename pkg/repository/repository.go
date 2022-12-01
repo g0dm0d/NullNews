@@ -13,10 +13,14 @@ type News interface {
 }
 
 type Auth interface {
-	Register(entity.User)
-	Login(string, string) (bool, entity.User)
-	SaveSession(string, int, time.Time) (int, error)
-	DeleteSession(int)
+	Register(user entity.User) error
+	Login(password, email string) (status bool, user entity.User)
+	SaveSession(token string, userID int, timeEXP time.Time) (int, error)
+}
+
+type JWT interface {
+	DeleteSession(sessionID int)
+	SessionExist(token string) (user entity.User, sessionID int, err error)
 }
 
 type MainDB struct {
@@ -30,11 +34,13 @@ func NewDB(db *sql.DB) *MainDB {
 type Repository struct {
 	News
 	Auth
+	JWT
 }
 
 func NewRep(db *sql.DB) *Repository {
 	return &Repository{
 		News: NewDB(db),
 		Auth: NewDB(db),
+		JWT:  NewDB(db),
 	}
 }

@@ -24,11 +24,11 @@ func NewAuth(repo repository.Auth, sectret string) *AuthService {
 func (s *AuthService) Register(w http.ResponseWriter, r *http.Request) {
 	var req entity.User
 	json.NewDecoder(r.Body).Decode(&req)
-	s.repo.Register(req)
-}
-
-type Session struct {
-	Session string
+	err := s.repo.Register(req)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
@@ -52,24 +52,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	token := TokenGenerate(user.ID, sessionID, user.Permission, s.sectret)
+	token := TokenGenerate(user, sessionID, s.sectret)
 	SetCookie(w, "token", token)
 	w.Write([]byte(b))
 }
-
-func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
-	token, err := r.Cookie("token")
-	if err != nil {
-		return
-	}
-	SetCookie(w, "token", "")
-	ParseToken, err := TokenParse(token.Value, s.sectret)
-	if err != nil {
-		return
-	}
-	s.repo.DeleteSession(ParseToken.SessionID)
-}
-
-// func (s *AuthService) RefreshToken(w http.ResponseWriter, r *http.Request) {
-// update JWT by session_token in localstorage
-// }
