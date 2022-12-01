@@ -91,7 +91,7 @@ func TokenParse(tokenString, secret string) (*TokenJWT, error) {
 			UserID:     claims["user_id"].(int),
 			Username:   claims["username"].(string),
 			FirstName:  claims["firstname"].(string),
-			lastName:   claims["lastname"].(string),
+			LastName:   claims["lastname"].(string),
 			SessionID:  claims["session_id"].(int),
 			Permission: claims["permission"].(int),
 			Exp:        claims["exp"].(float64),
@@ -112,7 +112,7 @@ type TokenJWT struct {
 	UserID     int
 	Username   string
 	FirstName  string
-	lastName   string
+	LastName   string
 	SessionID  int
 	Permission int
 	Exp        float64
